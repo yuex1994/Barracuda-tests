@@ -1,0 +1,13 @@
+bfs_kernel
+bfs_kernel2
+backprop_cuda_kernel
+backprop_cuda_kernel2
+hotspot
+lavamd
+nn_cuda
+needle_kernel
+needle_kernel2
+kmeans_cuda
+kmeans_cuda2
+partical_naive
+hashtable_kernel

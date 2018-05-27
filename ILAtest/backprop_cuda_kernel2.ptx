@@ -1,0 +1,101 @@
+
+	// .globl	_Z24bpnn_adjust_weights_cudaPfiS_iS_S_
+.visible .entry _Z24bpnn_adjust_weights_cudaPfiS_iS_S_(
+	.param .u64 _Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_0,
+	.param .u32 _Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_1,
+	.param .u64 _Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_2,
+	.param .u32 _Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_3,
+	.param .u64 _Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_4,
+	.param .u64 _Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_5
+)
+{
+	.reg .pred 	%p<2>;
+	.reg .f32 	%f<17>;
+	.reg .b32 	%r<12>;
+	.reg .f64 	%fd<25>;
+	.reg .b64 	%rd<19>;
+
+
+	ld.param.u64 	%rd4, [_Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_0];
+	ld.param.u32 	%r4, [_Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_1];
+	ld.param.u64 	%rd5, [_Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_2];
+	ld.param.u64 	%rd6, [_Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_4];
+	ld.param.u64 	%rd7, [_Z24bpnn_adjust_weights_cudaPfiS_iS_S__param_5];
+	cvta.to.global.u64 	%rd1, %rd6;
+	mov.u32 	%r1, %ctaid.y;
+	shl.b32 	%r5, %r1, 4;
+	mov.u32 	%r2, %tid.y;
+	add.s32 	%r6, %r2, %r5;
+	add.s32 	%r7, %r4, 1;
+	mov.u32 	%r3, %tid.x;
+	add.s32 	%r8, %r4, %r3;
+	mad.lo.s32 	%r9, %r6, %r7, %r8;
+	cvta.to.global.u64 	%rd8, %rd4;
+	mul.wide.s32 	%rd9, %r3, 4;
+	add.s64 	%rd2, %rd8, %rd9;
+	ld.global.f32 	%f1, [%rd2+4];
+	cvt.f64.f32	%fd1, %f1;
+	mul.f64 	%fd2, %fd1, 0d3FD3333333333333;
+	cvta.to.global.u64 	%rd10, %rd5;
+	mul.wide.s32 	%rd11, %r6, 4;
+	add.s64 	%rd12, %rd10, %rd11;
+	ld.global.f32 	%f2, [%rd12+4];
+	cvt.f64.f32	%fd3, %f2;
+	cvta.to.global.u64 	%rd3, %rd7;
+	mul.wide.s32 	%rd13, %r9, 4;
+	add.s64 	%rd14, %rd3, %rd13;
+	ld.global.f32 	%f3, [%rd14+8];
+	cvt.f64.f32	%fd4, %f3;
+	mul.f64 	%fd5, %fd4, 0d3FD3333333333333;
+	fma.rn.f64 	%fd6, %fd2, %fd3, %fd5;
+	add.s64 	%rd15, %rd1, %rd13;
+	ld.global.f32 	%f4, [%rd15+8];
+	cvt.f64.f32	%fd7, %f4;
+	add.f64 	%fd8, %fd7, %fd6;
+	cvt.rn.f32.f64	%f5, %fd8;
+	st.global.f32 	[%rd15+8], %f5;
+	ld.global.f32 	%f6, [%rd2+4];
+	cvt.f64.f32	%fd9, %f6;
+	mul.f64 	%fd10, %fd9, 0d3FD3333333333333;
+	ld.global.f32 	%f7, [%rd12+4];
+	cvt.f64.f32	%fd11, %f7;
+	ld.global.f32 	%f8, [%rd14+8];
+	cvt.f64.f32	%fd12, %f8;
+	mul.f64 	%fd13, %fd12, 0d3FD3333333333333;
+	fma.rn.f64 	%fd14, %fd10, %fd11, %fd13;
+	cvt.rn.f32.f64	%f9, %fd14;
+	st.global.f32 	[%rd14+8], %f9;
+	bar.sync 	0;
+	or.b32  	%r10, %r2, %r1;
+	setp.ne.s32	%p1, %r10, 0;
+	@%p1 bra 	BB1_2;
+
+	add.s32 	%r11, %r3, 1;
+	ld.global.f32 	%f10, [%rd2+4];
+	cvt.f64.f32	%fd15, %f10;
+	mul.wide.s32 	%rd16, %r11, 4;
+	add.s64 	%rd17, %rd3, %rd16;
+	ld.global.f32 	%f11, [%rd17];
+	cvt.f64.f32	%fd16, %f11;
+	mul.f64 	%fd17, %fd16, 0d3FD3333333333333;
+	fma.rn.f64 	%fd18, %fd15, 0d3FD3333333333333, %fd17;
+	add.s64 	%rd18, %rd1, %rd16;
+	ld.global.f32 	%f12, [%rd18];
+	cvt.f64.f32	%fd19, %f12;
+	add.f64 	%fd20, %fd19, %fd18;
+	cvt.rn.f32.f64	%f13, %fd20;
+	st.global.f32 	[%rd18], %f13;
+	ld.global.f32 	%f14, [%rd2+4];
+	cvt.f64.f32	%fd21, %f14;
+	ld.global.f32 	%f15, [%rd17];
+	cvt.f64.f32	%fd22, %f15;
+	mul.f64 	%fd23, %fd22, 0d3FD3333333333333;
+	fma.rn.f64 	%fd24, %fd21, 0d3FD3333333333333, %fd23;
+	cvt.rn.f32.f64	%f16, %fd24;
+	st.global.f32 	[%rd17], %f16;
+
+BB1_2:
+	ret;
+}
+
+

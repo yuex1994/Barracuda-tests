@@ -1,0 +1,169 @@
+	// .globl	_Z11kmeansPointPfiiiPiS_S_S0_
+.const .align 4 .b8 c_clusters[4352];
+.visible .entry _Z11kmeansPointPfiiiPiS_S_S0_(
+	.param .u64 _Z11kmeansPointPfiiiPiS_S_S0__param_0,
+	.param .u32 _Z11kmeansPointPfiiiPiS_S_S0__param_1,
+	.param .u32 _Z11kmeansPointPfiiiPiS_S_S0__param_2,
+	.param .u32 _Z11kmeansPointPfiiiPiS_S_S0__param_3,
+	.param .u64 _Z11kmeansPointPfiiiPiS_S_S0__param_4,
+	.param .u64 _Z11kmeansPointPfiiiPiS_S_S0__param_5,
+	.param .u64 _Z11kmeansPointPfiiiPiS_S_S0__param_6,
+	.param .u64 _Z11kmeansPointPfiiiPiS_S_S0__param_7
+)
+{
+	.reg .pred 	%p<9>;
+	.reg .f32 	%f<180>;
+	.reg .b32 	%r<25>;
+	.reg .b64 	%rd<6>;
+
+
+	ld.param.u32 	%r4, [_Z11kmeansPointPfiiiPiS_S_S0__param_2];
+	ld.param.u64 	%rd1, [_Z11kmeansPointPfiiiPiS_S_S0__param_4];
+	mov.u32 	%r6, %ctaid.y;
+	mov.u32 	%r7, %nctaid.x;
+	mov.u32 	%r8, %ctaid.x;
+	mad.lo.s32 	%r9, %r6, %r7, %r8;
+	mov.u32 	%r10, %ntid.x;
+	mul.lo.s32 	%r11, %r9, %r10;
+	mov.u32 	%r12, %ntid.y;
+	mov.u32 	%r13, %tid.x;
+	mad.lo.s32 	%r1, %r11, %r12, %r13;
+	mov.u32 	%r24, -1;
+	setp.ge.u32	%p1, %r1, %r4;
+	@%p1 bra 	BB1_2;
+
+	tex.1d.v4.f32.s32	{%f1, %f2, %f3, %f4}, [t_features, {%r1}];
+	ld.const.f32 	%f5, [c_clusters];
+	sub.f32 	%f6, %f1, %f5;
+	fma.rn.f32 	%f7, %f6, %f6, 0f00000000;
+	add.s32 	%r14, %r1, %r4;
+	tex.1d.v4.f32.s32	{%f8, %f9, %f10, %f11}, [t_features, {%r14}];
+	ld.const.f32 	%f12, [c_clusters+4];
+	sub.f32 	%f13, %f8, %f12;
+	fma.rn.f32 	%f14, %f13, %f13, %f7;
+	shl.b32 	%r15, %r4, 1;
+	add.s32 	%r16, %r15, %r1;
+	tex.1d.v4.f32.s32	{%f15, %f16, %f17, %f18}, [t_features, {%r16}];
+	ld.const.f32 	%f19, [c_clusters+8];
+	sub.f32 	%f20, %f15, %f19;
+	fma.rn.f32 	%f21, %f20, %f20, %f14;
+	mad.lo.s32 	%r17, %r4, 3, %r1;
+	tex.1d.v4.f32.s32	{%f22, %f23, %f24, %f25}, [t_features, {%r17}];
+	ld.const.f32 	%f26, [c_clusters+12];
+	sub.f32 	%f27, %f22, %f26;
+	fma.rn.f32 	%f28, %f27, %f27, %f21;
+	shl.b32 	%r18, %r4, 2;
+	add.s32 	%r19, %r18, %r1;
+	tex.1d.v4.f32.s32	{%f29, %f30, %f31, %f32}, [t_features, {%r19}];
+	ld.const.f32 	%f33, [c_clusters+16];
+	sub.f32 	%f34, %f29, %f33;
+	fma.rn.f32 	%f35, %f34, %f34, %f28;
+	setp.lt.f32	%p2, %f35, 0f7F7FFFFF;
+	selp.f32	%f36, %f35, 0f7F7FFFFF, %p2;
+	setp.geu.f32	%p3, %f35, 0f7F7FFFFF;
+	selp.b32	%r20, -1, 0, %p3;
+	tex.1d.v4.f32.s32	{%f37, %f38, %f39, %f40}, [t_features, {%r1}];
+	ld.const.f32 	%f41, [c_clusters+20];
+	sub.f32 	%f42, %f37, %f41;
+	fma.rn.f32 	%f43, %f42, %f42, 0f00000000;
+	tex.1d.v4.f32.s32	{%f44, %f45, %f46, %f47}, [t_features, {%r14}];
+	ld.const.f32 	%f48, [c_clusters+24];
+	sub.f32 	%f49, %f44, %f48;
+	fma.rn.f32 	%f50, %f49, %f49, %f43;
+	tex.1d.v4.f32.s32	{%f51, %f52, %f53, %f54}, [t_features, {%r16}];
+	ld.const.f32 	%f55, [c_clusters+28];
+	sub.f32 	%f56, %f51, %f55;
+	fma.rn.f32 	%f57, %f56, %f56, %f50;
+	tex.1d.v4.f32.s32	{%f58, %f59, %f60, %f61}, [t_features, {%r17}];
+	ld.const.f32 	%f62, [c_clusters+32];
+	sub.f32 	%f63, %f58, %f62;
+	fma.rn.f32 	%f64, %f63, %f63, %f57;
+	tex.1d.v4.f32.s32	{%f65, %f66, %f67, %f68}, [t_features, {%r19}];
+	ld.const.f32 	%f69, [c_clusters+36];
+	sub.f32 	%f70, %f65, %f69;
+	fma.rn.f32 	%f71, %f70, %f70, %f64;
+	setp.lt.f32	%p4, %f71, %f36;
+	selp.b32	%r21, 1, %r20, %p4;
+	selp.f32	%f72, %f71, %f36, %p4;
+	tex.1d.v4.f32.s32	{%f73, %f74, %f75, %f76}, [t_features, {%r1}];
+	ld.const.f32 	%f77, [c_clusters+40];
+	sub.f32 	%f78, %f73, %f77;
+	fma.rn.f32 	%f79, %f78, %f78, 0f00000000;
+	tex.1d.v4.f32.s32	{%f80, %f81, %f82, %f83}, [t_features, {%r14}];
+	ld.const.f32 	%f84, [c_clusters+44];
+	sub.f32 	%f85, %f80, %f84;
+	fma.rn.f32 	%f86, %f85, %f85, %f79;
+	tex.1d.v4.f32.s32	{%f87, %f88, %f89, %f90}, [t_features, {%r16}];
+	ld.const.f32 	%f91, [c_clusters+48];
+	sub.f32 	%f92, %f87, %f91;
+	fma.rn.f32 	%f93, %f92, %f92, %f86;
+	tex.1d.v4.f32.s32	{%f94, %f95, %f96, %f97}, [t_features, {%r17}];
+	ld.const.f32 	%f98, [c_clusters+52];
+	sub.f32 	%f99, %f94, %f98;
+	fma.rn.f32 	%f100, %f99, %f99, %f93;
+	tex.1d.v4.f32.s32	{%f101, %f102, %f103, %f104}, [t_features, {%r19}];
+	ld.const.f32 	%f105, [c_clusters+56];
+	sub.f32 	%f106, %f101, %f105;
+	fma.rn.f32 	%f107, %f106, %f106, %f100;
+	setp.lt.f32	%p5, %f107, %f72;
+	selp.b32	%r22, 2, %r21, %p5;
+	selp.f32	%f108, %f107, %f72, %p5;
+	tex.1d.v4.f32.s32	{%f109, %f110, %f111, %f112}, [t_features, {%r1}];
+	ld.const.f32 	%f113, [c_clusters+60];
+	sub.f32 	%f114, %f109, %f113;
+	fma.rn.f32 	%f115, %f114, %f114, 0f00000000;
+	tex.1d.v4.f32.s32	{%f116, %f117, %f118, %f119}, [t_features, {%r14}];
+	ld.const.f32 	%f120, [c_clusters+64];
+	sub.f32 	%f121, %f116, %f120;
+	fma.rn.f32 	%f122, %f121, %f121, %f115;
+	tex.1d.v4.f32.s32	{%f123, %f124, %f125, %f126}, [t_features, {%r16}];
+	ld.const.f32 	%f127, [c_clusters+68];
+	sub.f32 	%f128, %f123, %f127;
+	fma.rn.f32 	%f129, %f128, %f128, %f122;
+	tex.1d.v4.f32.s32	{%f130, %f131, %f132, %f133}, [t_features, {%r17}];
+	ld.const.f32 	%f134, [c_clusters+72];
+	sub.f32 	%f135, %f130, %f134;
+	fma.rn.f32 	%f136, %f135, %f135, %f129;
+	tex.1d.v4.f32.s32	{%f137, %f138, %f139, %f140}, [t_features, {%r19}];
+	ld.const.f32 	%f141, [c_clusters+76];
+	sub.f32 	%f142, %f137, %f141;
+	fma.rn.f32 	%f143, %f142, %f142, %f136;
+	setp.lt.f32	%p6, %f143, %f108;
+	selp.b32	%r23, 3, %r22, %p6;
+	selp.f32	%f144, %f143, %f108, %p6;
+	tex.1d.v4.f32.s32	{%f145, %f146, %f147, %f148}, [t_features, {%r1}];
+	ld.const.f32 	%f149, [c_clusters+80];
+	sub.f32 	%f150, %f145, %f149;
+	fma.rn.f32 	%f151, %f150, %f150, 0f00000000;
+	tex.1d.v4.f32.s32	{%f152, %f153, %f154, %f155}, [t_features, {%r14}];
+	ld.const.f32 	%f156, [c_clusters+84];
+	sub.f32 	%f157, %f152, %f156;
+	fma.rn.f32 	%f158, %f157, %f157, %f151;
+	tex.1d.v4.f32.s32	{%f159, %f160, %f161, %f162}, [t_features, {%r16}];
+	ld.const.f32 	%f163, [c_clusters+88];
+	sub.f32 	%f164, %f159, %f163;
+	fma.rn.f32 	%f165, %f164, %f164, %f158;
+	tex.1d.v4.f32.s32	{%f166, %f167, %f168, %f169}, [t_features, {%r17}];
+	ld.const.f32 	%f170, [c_clusters+92];
+	sub.f32 	%f171, %f166, %f170;
+	fma.rn.f32 	%f172, %f171, %f171, %f165;
+	tex.1d.v4.f32.s32	{%f173, %f174, %f175, %f176}, [t_features, {%r19}];
+	ld.const.f32 	%f177, [c_clusters+96];
+	sub.f32 	%f178, %f173, %f177;
+	fma.rn.f32 	%f179, %f178, %f178, %f172;
+	setp.lt.f32	%p7, %f179, %f144;
+	selp.b32	%r24, 4, %r23, %p7;
+
+BB1_2:
+	@%p1 bra 	BB1_4;
+
+	cvta.to.global.u64 	%rd3, %rd1;
+	mul.wide.u32 	%rd4, %r1, 4;
+	add.s64 	%rd5, %rd3, %rd4;
+	st.global.u32 	[%rd5], %r24;
+
+BB1_4:
+	ret;
+}
+
+

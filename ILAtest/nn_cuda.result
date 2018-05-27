@@ -1,0 +1,60 @@
+{'%ctaid.x': '.b32', '%ctaid.y': '.b32', '%f4': '.f32', '%f5': '.f32', '%p0': '.pred', '%p1': '.pred', '%tid.x': '.b32', '%tid.y': '.b32', '%f0': '.f32', '%f1': '.f32', '%f2': '.f32', '%f3': '.f32', '%nctaid.y': '.b32', '%nctaid.x': '.b32', '%f6': '.f32', '%f7': '.f32', '%r8': '.b32', '_Z6euclidP7latLongPfiff_param_0': '.u64', '_Z6euclidP7latLongPfiff_param_1': '.u64', '_Z6euclidP7latLongPfiff_param_2': '.u32', '_Z6euclidP7latLongPfiff_param_3': '.f32', '_Z6euclidP7latLongPfiff_param_4': '.f32', '%f9': '.f32', '%f8': '.f32', '%r4': '.b32', '%r5': '.b32', '%r6': '.b32', '%r7': '.b32', '%r0': '.b32', '%r1': '.b32', '%r2': '.b32', '%r3': '.b32', '%rd5': '.b64', '%rd4': '.b64', '%rd7': '.b64', '%rd6': '.b64', '%rd1': '.b64', '%rd0': '.b64', '%rd3': '.b64', '%rd2': '.b64', '%ntid.y': '.b32', '%ntid.x': '.b32', '%rd8': '.b64'}
+{'BB0_2': 84}
+84
+['ld.param.u32', '%r2', '_Z6euclidP7latLongPfiff_param_2']
+0
+['ld.param.f32', '%f1', '_Z6euclidP7latLongPfiff_param_3']
+4
+['ld.param.f32', '%f2', '_Z6euclidP7latLongPfiff_param_4']
+8
+['mov.u32', '%r3', '%ctaid.y']
+12
+['mov.u32', '%r4', '%nctaid.x']
+16
+['mov.u32', '%r5', '%ctaid.x']
+20
+['mad.lo.s32', '%r6', '%r3', '%r4', '%r5']
+24
+['mov.u32', '%r7', '%ntid.x']
+28
+['mov.u32', '%r8', '%tid.x']
+32
+['mad.lo.s32', '%r1', '%r6', '%r7', '%r8']
+36
+['setp.ge.s32', '%p1', '%r1', '%r2']
+40
+['@', '%p1', 'bra', 'BB0_2']
+44
+@
+84
+['cvta.to.global.u64', '%rd3', '%rd1']
+48
+['cvta.to.global.u64', '%rd4', '%rd2']
+52
+['mul.wide.s32', '%rd5', '%r1', '4']
+56
+['add.s64', '%rd6', '%rd4', '%rd5']
+60
+['mul.wide.s32', '%rd7', '%r1', '8']
+64
+['add.s64', '%rd8', '%rd3', '%rd7']
+68
+['ld.global.f32', '%f3', '%rd8']
+72
+['ld.global.f32', '%f5', '%rd8+4']
+76
+['st.global.f32', '%rd6', '%f9']
+80
+{'BB0_2': 84}
+84
+@
+84
+['%rd8']
+['%rd6']
+['%rd8', '4']
+['%rd6']
+%tid.x
+%ctaid.x
+%ctaid.y
+True
+5.05
