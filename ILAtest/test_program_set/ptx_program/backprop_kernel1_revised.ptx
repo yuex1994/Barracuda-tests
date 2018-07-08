@@ -1,0 +1,125 @@
+.visible .entry _Z22bpnn_layerforward_CUDAPfS_S_S_ii(
+	.param .u64 _Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_0,
+	.param .u64 _Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_1,
+	.param .u64 _Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_2,
+	.param .u64 _Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_3,
+	.param .u32 _Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_4,
+	.param .u32 _Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_5
+)
+{
+	.reg .pred 	%p<7>;
+	.reg .f32 	%f<20>;
+	.reg .b32 	%r<26>;
+	.reg .b64 	%rd<13>;
+	// demoted variable
+	.shared .align 4 .b8 _Z22bpnn_layerforward_CUDAPfS_S_S_ii$__cuda_local_var_15761_34_non_const_input_node[64];
+	// demoted variable
+	.shared .align 4 .b8 _Z22bpnn_layerforward_CUDAPfS_S_S_ii$__cuda_local_var_15762_34_non_const_weight_matrix[1024];
+
+	ld.param.u64 	%rd3, [_Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_0];
+	ld.param.u64 	%rd4, [_Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_2];
+	ld.param.u64 	%rd5, [_Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_3];
+	ld.param.u32 	%r8, [_Z22bpnn_layerforward_CUDAPfS_S_S_ii_param_5];
+	mov.u32 	%r1, %ctaid.y;
+	shl.b32 	%r9, %r1, 4;
+	mov.u32 	%r2, %tid.y;
+	add.s32 	%r3, %r2, %r9;
+	mov.u32 	%r4, %tid.x;
+	shl.b32 	%r10, %r2, 2;
+	mov.u32 	%r11, _Z22bpnn_layerforward_CUDAPfS_S_S_ii$__cuda_local_var_15761_34_non_const_input_node;
+	add.s32 	%r5, %r11, %r10;
+	setp.ne.s32	%p2, %r4, 0;
+	@%p2 bra 	BB0_2;
+
+	cvta.to.global.u64 	%rd6, %rd3;
+	mul.wide.s32 	%rd7, %r3, 4;
+	add.s64 	%rd8, %rd6, %rd7;
+	ld.global.f32 	%f1, [%rd8+4];
+	st.shared.f32 	[%r5], %f1;
+
+BB0_2:
+	cvta.to.global.u64 	%rd1, %rd4;
+	add.s32 	%r12, %r8, 1;
+	add.s32 	%r13, %r8, %r4;
+	mad.lo.s32 	%r6, %r3, %r12, %r13;
+	bar.sync 	0;
+	mul.wide.s32 	%rd9, %r6, 4;
+	add.s64 	%rd2, %rd1, %rd9;
+	ld.global.f32 	%f2, [%rd2+8];
+	shl.b32 	%r14, %r2, 6;
+	mov.u32 	%r15, _Z22bpnn_layerforward_CUDAPfS_S_S_ii$__cuda_local_var_15762_34_non_const_weight_matrix;
+	add.s32 	%r16, %r15, %r14;
+	shl.b32 	%r17, %r4, 2;
+	add.s32 	%r7, %r16, %r17;
+	st.shared.f32 	[%r7], %f2;
+	bar.sync 	0;
+	ld.shared.f32 	%f3, [%r5];
+	ld.shared.f32 	%f4, [%r7];
+	mul.f32 	%f5, %f4, %f3;
+	st.shared.f32 	[%r7], %f5;
+	bar.sync 	0;
+	and.b32  	%r18, %r2, 1;
+	setp.eq.b32	%p3, %r18, 1;
+	@%p3 bra 	BB0_4;
+
+	ld.shared.f32 	%f6, [%r7];
+	ld.shared.f32 	%f7, [%r7+64];
+	add.f32 	%f8, %f6, %f7;
+	st.shared.f32 	[%r7], %f8;
+
+BB0_4:
+	bar.sync 	0;
+	and.b32  	%r19, %r2, 3;
+	setp.ne.s32	%p4, %r19, 0;
+	@%p4 bra 	BB0_6;
+
+	ld.shared.f32 	%f9, [%r7];
+	ld.shared.f32 	%f10, [%r7+128];
+	add.f32 	%f11, %f9, %f10;
+	st.shared.f32 	[%r7], %f11;
+
+BB0_6:
+	bar.sync 	0;
+	and.b32  	%r20, %r2, 7;
+	setp.ne.s32	%p5, %r20, 0;
+	@%p5 bra 	BB0_8;
+
+	ld.shared.f32 	%f12, [%r7];
+	ld.shared.f32 	%f13, [%r7+256];
+	add.f32 	%f14, %f12, %f13;
+	st.shared.f32 	[%r7], %f14;
+
+BB0_8:
+	bar.sync 	0;
+	and.b32  	%r21, %r2, 15;
+	setp.ne.s32	%p6, %r21, 0;
+	@%p6 bra 	BB0_10;
+
+	ld.shared.f32 	%f15, [%r7];
+	ld.shared.f32 	%f16, [%r7+512];
+	add.f32 	%f17, %f15, %f16;
+	st.shared.f32 	[%r7], %f17;
+
+BB0_10:
+	setp.eq.s32	%p1, %r4, 0;
+	bar.sync 	0;
+	ld.shared.f32 	%f18, [%r7];
+	st.global.f32 	[%rd2+8], %f18;
+	bar.sync 	0;
+	@!%p1 bra 	BB0_12;
+	bra.uni 	BB0_11;
+
+BB0_11:
+	cvta.to.global.u64 	%rd10, %rd5;
+	add.s32 	%r24, %r15, %r10;
+	ld.shared.f32 	%f19, [%r24];
+	mad.lo.s32 	%r25, %r1, %r8, %r2;
+	mul.wide.s32 	%rd11, %r25, 4;
+	add.s64 	%rd12, %rd10, %rd11;
+	st.global.f32 	[%rd12], %f19;
+
+BB0_12:
+	ret;
+}
+
+
