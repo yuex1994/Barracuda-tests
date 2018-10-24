@@ -6,10 +6,12 @@ import re
 import sys
 ila.setloglevel(3, '')
 ila.enablelog('BMCResult')
-ptx_declaration_obj = open('ptx_declaration_file', 'r')
+FILE_DIR = 'files/'
+TMP_DIR = 'tmp/'
+ptx_declaration_obj = open(TMP_DIR + 'ptx_declaration_file', 'r')
 ptx_declaration = pickle.load(ptx_declaration_obj)
 print ptx_declaration
-program_obj = open('ptx_add_neighbor', 'r')
+program_obj = open(TMP_DIR + 'ptx_program', 'r')
 program = pickle.load(program_obj)
 instruction_format = Instruction_Format.InstructionFormat()
 
@@ -154,34 +156,19 @@ class ptxGPUModel(object):
 
         self.log_clean = ila.bool(False)
         self.check_clean = ila.bool(False)
-        #######################################
-        #For barrier sync, not complete
-        #for pc_0 in self.bar_sync_list:
-        #    for pc_1 in self.bar_sync_list:
-        #        self.log_clean = self.log_clean | ((self.pc_list[0] == pc_0) & (self.pc_list[1] == pc_1))
-        #        self.check_clean = self.check_clean | ((self.pc_list[0] == pc_0) & (self.pc_list[1] == pc_1))
-        #####################################
-        #For barrier arrive, not complete#
-        #for pc_sync in self.bar_sync_list:
-        #    for pc_arrive in self.bar_arrive_list:
-        #        self.log_clean = self.log_clean | ((self.pc_list[1] == pc_sync) & (self.pc_list[0] == pc_arrive))
-        #        self.check_clean = self.check_clean | ((self.pc_list[0] == pc_sync) & (self.pc_list[1] == pc_arrive))
-
         for pc in self.bar_sync_list:
             self.log_clean = self.log_clean | ((self.pc_list[0] == pc) & (self.pc_list[1] == pc))
             self.check_clean = self.check_clean | ((self.pc_list[0] == pc) & (self.pc_list[1] == pc))
+
         ctaidx_0 = self.model.getreg('%ctaid.x_0')
         ctaidx_1 = self.model.getreg('%ctaid.x_1')
         ctaidy_0 = self.model.getreg('%ctaid.y_0')
         ctaidy_1 = self.model.getreg('%ctaid.y_1')
         self.log_clean = (self.log_clean) & ((ctaidx_0 == ctaidx_1) & (ctaidy_0 == ctaidy_1))
         self.check_clean = (self.check_clean) & ((ctaidx_0 == ctaidx_1) & (ctaidy_0 == ctaidy_1))
-
-            
         for pc in access_set.keys():
             reg_name = access_set[pc]
             operands = re.split('\+', reg_name)
-            #print operands
             reg_len = 64
             print operands
             for i in range(len(operands)):
@@ -202,11 +189,6 @@ class ptxGPUModel(object):
 
             en_access_reg_next = ila.const(0x1, 1)
             en_access_reg_clear = ila.const(0x0, 1)
-            #if log:
-            #    self.model.set_next(reg_name + '_en_%s_%d' % (suffix, pc), ila.ite(self.pc_list[index] == pc, en_access_reg_next, ila.ite(self.log_clean, ila.const(0x0, 1), en_access_reg)))
-            #else:
-            #    self.model.set_next(reg_name + '_en_%s_%d' % (suffix, pc), ila.ite(self.pc_list[index] == pc, en_access_reg_next, ila.ite(self.check_clean, ila.const(0x0, 1), en_access_reg)))
- 
             if log:
                 self.log_register_next = ila.ite((self.pc_list[0] == pc) & (self.arb_list[index] == 1), access_reg_next, self.log_register_next)
                 self.en_log_register_next = ila.ite((self.pc_list[0] == pc) & (self.arb_list[index] == 1), en_access_reg_next, self.en_log_register_next)
@@ -216,8 +198,7 @@ class ptxGPUModel(object):
                     self.log_atom_flag_register_next = ila.ite((self.pc_list[0] == pc) & (self.arb_list[index] == 1), ila.const(0x1, 1), self.log_atom_flag_register_next)
                 else:
                     self.log_atom_flag_register_next = ila.ite((self.pc_list[0] == pc) & (self.arb_list[index] == 1), ila.const(0x0, 1), self.log_atom_flag_register_next)
-                #self.log_register_next = ila.ite(self.pc_list[index] == pc, ila.ite(self.arb_list[index] == 1, access_reg_next, self.log_register_next), self.log_register_next)
-                #self.en_log_register_next = ila.ite(self.pc_list[index] == pc, ila.ite((self.arb_list[index] == 1) & (conj_pred), en_access_reg_next, self.en_log_register_next), self.en_log_register_next)
+
             else:
                 self.check_register_next = ila.ite((self.pc_list[1] == pc) & (self.arb_list[index] == 1), access_reg_next, self.check_register_next)
                 self.en_check_register_next = ila.ite((self.pc_list[1] == pc) & (self.arb_list[index] == 1), en_access_reg_next, self.en_check_register_next)
@@ -228,55 +209,42 @@ class ptxGPUModel(object):
                 else:
                     self.check_atom_flag_register_next = ila.ite((self.pc_list[1] == pc) & (self.arb_list[index] == 1), ila.const(0x0, 1), self.check_atom_flag_register_next)
  
-                #self.check_register_next = ila.ite(self.pc_list[index] == pc, ila.ite(self.arb_list[index] == 1, access_reg_next, self.check_register_next), self.check_register_next)
-                #self.en_check_register_next = ila.ite(self.pc_list[index] == pc, ila.ite((self.arb_list[index] == 1) & (conj_pred), en_access_reg_next, self.en_check_register_next), self.en_check_register_next)
         if log:
             self.en_log_register_next = ila.ite(self.log_clean, ila.const(0x0, 1), self.en_log_register_next)
         else:
             self.en_check_register_next = ila.ite(self.check_clean, ila.const(0x0, 1), self.en_check_register_next)
  
 
- 
- 
- 
     def createLog(self):
-        #ld_set_file = 'ld_set'
-        #ld_set_obj = open(ld_set_file, 'r')
-        #ld_set = pickle.load(ld_set_obj)
-        #ld_set_obj.close()
         s_ld_set_file = 's_ld_set'
-        s_ld_set_obj = open(s_ld_set_file, 'r')
+        s_ld_set_obj = open(TMP_DIR + s_ld_set_file, 'r')
         s_ld_set = pickle.load(s_ld_set_obj)
         s_ld_set_obj.close()
         g_ld_set_file = 'g_ld_set'
-        g_ld_set_obj = open(g_ld_set_file, 'r')
+        g_ld_set_obj = open(TMP_DIR + g_ld_set_file, 'r')
         g_ld_set = pickle.load(g_ld_set_obj)
         g_ld_set_obj.close()
         l_ld_set_file = 'l_ld_set'
-        l_ld_set_obj = open(l_ld_set_file, 'r')
+        l_ld_set_obj = open(TMP_DIR + l_ld_set_file, 'r')
         l_ld_set = pickle.load(l_ld_set_obj)
         l_ld_set_obj.close()
         g_atom_set_file = 'g_atom_set' 
-        g_atom_set_obj = open(g_atom_set_file, 'r')
+        g_atom_set_obj = open(TMP_DIR + g_atom_set_file, 'r')
         g_atom_set = pickle.load(g_atom_set_obj)
         s_atom_set_file = 's_atom_set'
-        s_atom_set_obj = open(s_atom_set_file, 'r')
+        s_atom_set_obj = open(TMP_DIR + s_atom_set_file, 'r')
         s_atom_set = pickle.load(s_atom_set_obj)
          
-        #st_set_file = 'st_set'
-        #st_set_obj = open(st_set_file, 'r')
-        #st_set = pickle.load(st_set_obj)
-        #st_set_obj.close()
         g_st_set_file = 'g_st_set'
-        g_st_set_obj = open(g_st_set_file, 'r')
+        g_st_set_obj = open(TMP_DIR + g_st_set_file, 'r')
         g_st_set = pickle.load(g_st_set_obj)
         g_st_set_obj.close()
         s_st_set_file = 's_st_set'
-        s_st_set_obj = open(s_st_set_file, 'r')
+        s_st_set_obj = open(TMP_DIR + s_st_set_file, 'r')
         s_st_set = pickle.load(s_st_set_obj)
         s_st_set_obj.close()
         l_st_set_file = 'l_st_set'
-        l_st_set_obj = open(l_st_set_file, 'r')
+        l_st_set_obj = open(TMP_DIR + l_st_set_file, 'r')
         l_st_set = pickle.load(l_st_set_obj)
         l_st_set_obj.close()
 
@@ -293,27 +261,23 @@ class ptxGPUModel(object):
         self.create_data_race_element(s_atom_set, True, ila.const(0x1, 2), 1)
 
     def createCheck(self):
-        #st_set_file = 'st_set'
-        #st_set_obj = open(st_set_file, 'r')
-        #st_set = pickle.load(st_set_obj)
-        #st_set_obj.close()
         g_st_set_file = 'g_st_set'
-        g_st_set_obj = open(g_st_set_file, 'r')
+        g_st_set_obj = open(TMP_DIR + g_st_set_file, 'r')
         g_st_set = pickle.load(g_st_set_obj)
         g_st_set_obj.close()
         s_st_set_file = 's_st_set'
-        s_st_set_obj = open(s_st_set_file, 'r')
+        s_st_set_obj = open(TMP_DIR + s_st_set_file, 'r')
         s_st_set = pickle.load(s_st_set_obj)
         s_st_set_obj.close()
         l_st_set_file = 'l_st_set'
-        l_st_set_obj = open(l_st_set_file, 'r')
+        l_st_set_obj = open(TMP_DIR + l_st_set_file, 'r')
         l_st_set = pickle.load(l_st_set_obj)
         l_st_set_obj.close()
         g_atom_set_file = 'g_atom_set' 
-        g_atom_set_obj = open(g_atom_set_file, 'r')
+        g_atom_set_obj = open(TMP_DIR + g_atom_set_file, 'r')
         g_atom_set = pickle.load(g_atom_set_obj)
         s_atom_set_file = 's_atom_set'
-        s_atom_set_obj = open(s_atom_set_file, 'r')
+        s_atom_set_obj = open(TMP_DIR + s_atom_set_file, 'r')
         s_atom_set = pickle.load(s_atom_set_obj)
     
         self.create_data_race_element(g_st_set, False, ila.const(0x2, 2), 0)
@@ -416,9 +380,8 @@ class ptxGPUModel(object):
                 self.bar_aux_inst[index] = self.bar_aux_inst[index] | (self.pc_list[index] == self.current_pc)
                 if self.current_pc not in self.bar_aux_list:
                     self.bar_aux_list.append(self.current_pc)
-            #TODO: pc_next when bar
-            
         return dest
+
 
     def adjust_dest(self, index, dest, dest_str, op_len):
         dest_type = ptx_declaration[dest_str]
@@ -432,6 +395,7 @@ class ptxGPUModel(object):
                 return dest[(dest_len - 1) : 0]
             else:
                 return dest
+
 
     def perform_instruction(self, index, program_line, pc_target):
             if len(program_line) < 2:
@@ -505,13 +469,10 @@ class ptxGPUModel(object):
                     op_len = instruction_format.LONG_REG_BITS
                 dest = self.adjust_dest(index, dest, dest_str, op_len)
                 current_next_state = self.next_state_dict[dest_str + '_%d' % (index)]
-                #print program_line
                 self.next_state_dict[dest_str + '_%d' % (index)] = ila.ite(self.pc_list[index] == self.current_pc, dest, current_next_state)
                 self.current_pc += 4
                 return 
             else:
-                #conj_pred0 = self.pred_gen(0, self.pred_map[self.current_pc])
-                #conj_pred1 = self.pred_gen(1, self.pred_map[self.current_pc])
                 if (opcode_name == '@'):
                     opcode_jmp_dest = program_line[3]
                     pred_guard = self.pred_one
@@ -532,13 +493,10 @@ class ptxGPUModel(object):
                     pc_jmp = ila.const(opcode_jmp_target, instruction_format.PC_BITS)
                 self.pc_next_list[index] = ila.ite(self.pc_list[index] == self.current_pc, pc_jmp, self.pc_next_list[index])
                 self.current_pc += 4
-
-
-
-            
+ 
  
     def generate_next_state(self, index):
-        instruction_book_obj = open('instruction_book', 'r')
+        instruction_book_obj = open(FILE_DIR + 'instruction_book', 'r')
         instruction_book = instruction_book_obj.readlines()
         self.next_state_finished = []
         pc_target = {}
@@ -561,17 +519,15 @@ class ptxGPUModel(object):
         for program_line in program:
             current_pc_in = self.current_pc
             self.perform_instruction(index, program_line, pc_target)
-            #if self.current_pc == current_pc_in: #Just to find if there's any instruction not in the instruction-book
-                #print program_line
         for reg_name in ptx_declaration.keys():
             if reg_name not in self.next_state_finished:
-                #print reg_name
                 reg = self.model.getreg(reg_name + '_%d' %(index))
                 self.model.set_next(reg_name + '_%d' %(index), reg)
         self.pc_max = self.current_pc
+
  
     def set_next_state(self):
-        #reg
+        # reg next state
         for state_name in self.next_state_dict.keys():
             index = int(state_name[-1])
             self.model.set_next(state_name, self.next_state_dict[state_name])
@@ -597,17 +553,17 @@ class ptxGPUModel(object):
         self.model.set_next('pc_%d' % (index) , ila.ite(self.pc_list[index] < (self.pc_max), ila.ite(self.pc_wait, self.pc_list[index], self.pc_next_list[index]), self.pc_list[index]))
     
     def add_assumptions(self):
-        ptx_declaration_diff_obj = open('diff_read_only_regs', 'r')
+        ptx_declaration_diff_obj = open(TMP_DIR + 'diff_read_only_regs', 'r')
         ptx_declaration_diff = pickle.load(ptx_declaration_diff_obj)
-        ptx_declaration_shared_obj = open('shared_read_only_regs', 'r')
+        ptx_declaration_shared_obj = open(TMP_DIR + 'shared_readonly_regs', 'r')
         ptx_declaration_shared = pickle.load(ptx_declaration_shared_obj)
-        ptx_parameter_regs_obj = open('parameter_regs', 'r')
+        ptx_parameter_regs_obj = open(TMP_DIR + 'parameter_regs', 'r')
         ptx_parameter_regs = pickle.load(ptx_parameter_regs_obj)
-        ptx_buildin_regs_obj = open('buildin_regs', 'r')
+        ptx_buildin_regs_obj = open(TMP_DIR + 'buildin_regs', 'r')
         ptx_buildin_regs = pickle.load(ptx_buildin_regs_obj)
-        ptx_shared_read_only_range_regs_obj = open('shared_read_only_range_regs', 'r')
+        ptx_shared_read_only_range_regs_obj = open(TMP_DIR + 'shared_read_only_range_regs', 'r')
         ptx_shared_read_only_range_regs = pickle.load(ptx_shared_read_only_range_regs_obj)
-        ptx_zero_starter_obj = open('zero_starter', 'r')
+        ptx_zero_starter_obj = open(TMP_DIR + 'zero_starter', 'r')
         ptx_zero_starter = pickle.load(ptx_zero_starter_obj)
         self.init = ila.bool(True) 
         pc = self.model.getreg('pc_0')
@@ -616,9 +572,6 @@ class ptxGPUModel(object):
         self.init = self.init & (pc == self.model.const(0x0, instruction_format.PC_BITS))
         i = 1
         for reg_name in ptx_declaration_shared:
-            #TODO: change this in future.
-            #if reg_name[0] == '%':
-            #    continue 
             reg0 = self.model.getreg(reg_name + '_%d' % (0))
             reg1 = self.model.getreg(reg_name + '_%d' % (1))
             self.init = self.init & (reg0 == reg1)
@@ -627,25 +580,21 @@ class ptxGPUModel(object):
             if operand_len < 64:
                 self.init_max = self.model.const(i, instruction_format.REG_BITS) << 27
                 self.init_range = self.model.const(1, instruction_format.REG_BITS) << 26
-                #self.init = self.init & (reg0 < self.init_max) & (reg0 > (self.init_max - self.init_range))
                 self.init = self.init & (reg0 == (self.init_max - self.init_range))
                 i += 1
                 continue
             self.init_max = self.model.const(i, instruction_format.LONG_REG_BITS) << 59
             self.init_range = self.model.const(1, instruction_format.LONG_REG_BITS) << 58
-            #self.init = self.init & (reg0 < self.init_max) & (reg0 > (self.init_max - self.init_range))
             self.init = self.init & (reg0 == (self.init_max - self.init_range))
             i += 1
         self.diff = ila.bool(False)
         self.diff_range = ila.bool(True)
         for reg in ptx_declaration_diff.keys():
-            print reg
             reg0 = self.model.getreg(reg + '_%d' %(0))
             reg1 = self.model.getreg(reg + '_%d' %(1))
             v = ptx_declaration_diff[reg]
             self.diff = self.diff | (reg0 != reg1)
             self.diff_range = self.diff_range & (reg0 < v) & (reg1 < v) & (reg0 >= 0) & (reg1 >= 0)
-            #self.init = self.init & (reg0 != reg1) & (reg0 < 64) & (reg0 >= 0) & (reg1 < 64) & (reg1 >= 0)
         self.init = self.init & self.diff_range & self.diff
 
         for reg in ptx_parameter_regs.keys():
@@ -671,19 +620,10 @@ class ptxGPUModel(object):
             reg1 = self.model.getreg(reg + '_%d' % (1))
             self.init = self.init & (reg0 == 0) & (reg1 == 0) 
 
-
         for reg in self.pred_registers:
             self.init = self.init & (reg == self.pred_one)
         self.init = self.init & (self.en_log_register == 0) & (self.en_check_register == 0) & (self.log_atom_flag_register == 0) & (self.check_atom_flag_register == 0)
         self.init = self.init & (self.mutex_flag_list[0] == 0) & (self.mutex_flag_list[1] == 0) & (self.mflag_log_register == 0) & (self.mflag_check_register == 0)
-
- 
-        #self.condition = []
-        #for index in range(self.thread_num):
-        #    self.condition.append(self.pc_list[index] >= (self.pc_max)) 
-        #self.constrain = self.condition[0]
-        #for index in range(1, len(self.condition)):
-        #    self.constrain = self.constrain & self.condition[index]
         tidx0 = self.model.getreg('%tid.x_0')
         tidx1 = self.model.getreg('%tid.x_1')
         tidy0 = self.model.getreg('%tid.y_0')
@@ -697,13 +637,14 @@ class ptxGPUModel(object):
         ctaidz0 = self.model.getreg('%ctaid.z_0')
         ctaidz1 = self.model.getreg('%ctaid.z_1')
  
-        #######Imply with no warp
+        # Imply with no warp
         self.imply =(~((self.log_atom_flag_register == 1) & (self.check_atom_flag_register == 1))) & (self.check_register == self.log_register) & (self.en_log_register == 1) & (self.en_check_register == 1) & (((self.lsg_log_register == 2) & (self.lsg_check_register == 2)) | ((self.lsg_log_register == 1) & (self.lsg_check_register == 1) & (ctaidx0 == ctaidx1) & (ctaidy0 == ctaidy1) & (ctaidz0 == ctaidz1) )) #& (~((ctaidx0 == ctaidx1) & ((tid0 >> 5) == (tid1 >> 5)))) 
  #& (ctaidx0 == ctaidx1) & (ctaidy0 == ctaidy1)))  #& ((tid0 >> 5) != (tid1 >> 5))
-        ######Imply with warp
-        #self.imply = (self.imply) | ((self.log_register_next != self.log_register) & (self.check_register_next != self.check_register) & (self.check_register_next == self.log_register_next) & (self.en_log_register_next == 1) & (self.en_check_register_next == 1) & (((self.lsg_log_register_next == 2) & (self.lsg_check_register_next == 2)) | ((self.lsg_log_register_next == 1) & (self.lsg_check_register_next == 1))) & (ctaidx0 == ctaidx1) & ((tid0 >> 5) == (tid1 >> 5))) #& (ctaidx0 == ctaidx1) & (ctaidy0 == ctaidy1)))  #& ((tid0 >> 5) != (tid1 >> 5))
+
+        # Imply with warp
+        # self.imply = (self.imply) | ((self.log_register_next != self.log_register) & (self.check_register_next != self.check_register) & (self.check_register_next == self.log_register_next) & (self.en_log_register_next == 1) & (self.en_check_register_next == 1) & (((self.lsg_log_register_next == 2) & (self.lsg_check_register_next == 2)) | ((self.lsg_log_register_next == 1) & (self.lsg_check_register_next == 1))) & (ctaidx0 == ctaidx1) & ((tid0 >> 5) == (tid1 >> 5))) #& (ctaidx0 == ctaidx1) & (ctaidy0 == ctaidy1)))  #& ((tid0 >> 5) != (tid1 >> 5))
  
-        ########Imply with rel acq
+        # Imply with rel acq
         self.imply = self.imply & (~((self.mflag_log_register == 1) & (self.mflag_check_register == 1) & (self.mguard_log_register == self.mguard_check_register)))
 
 
@@ -711,11 +652,6 @@ class ptxGPUModel(object):
         #self.model.set_init('predicate_bit', self.model.bool(True))
         self.init = self.init & (self.predicate_bit == self.model.bool(True))
         self.model.set_next('predicate_bit', ila.ite(self.imply, self.model.bool(False), self.predicate_bit))
-#        self.a = self.model.reg('a', 1)
-#        self.b = self.model.reg('b', 1)
-#        self.model.set_next('a', ila.ite(self.pc_list[0] == 4, self.arb, self.a))
-#        self.model.set_next('b', ila.ite(self.pc_list[0] == 8, self.arb, self.b))
-#        self.test = ila.ite(self.pc_list[0] > 8, self.a == self.b, ila.bool(True)) 
         
     def aux_imm(self, operand_str, index, op_len):
         if operand_str in ptx_declaration.keys():
@@ -732,8 +668,6 @@ class ptxGPUModel(object):
             else:
                 return operand
         else:
-            #print operand_str
-            #print op_len
             try:
                 operand_int = int(operand_str)
             except ValueError:
@@ -744,36 +678,31 @@ class ptxGPUModel(object):
             else:
                 operand = self.model.const(operand_int, op_len)
             return operand
-ptx = ptxGPUModel()
-time_consumption = []
-result = []
-start = time.clock()
-print ptx.model.bmcCond(ptx.predicate_bit == ila.bool(True), int(sys.argv[1]), ptx.init)
-#bfs_kernel:148
-#bfs_kernel2:24
-#backprop_kernel:100
-#backprop_kernel2:46
-#hotspot:180
-#lavamd:388
-#needle1:425
-#needle2:428
-#kmeans1:38
-#kmeans2:45
-#Particle_naive:68
-#pathfinder: 246
-#hashtable:35->70
-#volume:66
-end = time.clock()
-print end-start
-  
-#for i in range(1, 30):
-#    start = time.clock()
-#    ptx.model.bmcCond(ptx.predicate_bit == ila.bool(True), i, ptx.init)
-#    end = time.clock()
-#    time_consumption.append(end - start)
-#    r = ptx.model.bmcCond(ptx.predicate_bit == ila.bool(True), i, ptx.init)
-#    result.append(r)
-#print time_consumption
-#print result   
 
-#print ptx.model.bmcInit(ptx.predicate_bit == ila.bool(True), 28, True)
+
+if __name__ == '__main__':
+    ptx = ptxGPUModel()
+    time_consumption = []
+    result = []
+    start = time.clock()
+    print ptx.model.bmcCond(ptx.predicate_bit == ila.bool(True), int(sys.argv[1]), ptx.init)
+    end = time.clock()
+    print end-start
+ 
+# TODO(Yue Xing): store this into a struct.
+# Reference code length:
+# bfs_kernel:148
+# bfs_kernel2:24
+# backprop_kernel:100
+# backprop_kernel2:46
+# hotspot:180
+# lavamd:388
+# needle1:425
+# needle2:428
+# kmeans1:38
+# kmeans2:45
+# Particle_naive:68
+# pathfinder: 246
+# hashtable:35->70
+# volume:66
+ 
